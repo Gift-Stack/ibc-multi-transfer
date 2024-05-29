@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
-import Image from "next/image";
 import { Card } from "@milkyway-engine/ui/card";
 import styles from "./page.module.css";
 import Navbar from "./_components/nav";
+import { Suspense } from "react";
 
 function Gradient({
   conic,
@@ -54,7 +54,9 @@ const LINKS = [
 export default function Page(): JSX.Element {
   return (
     <main className="relative flex flex-col items-center justify-between- min-h-screen p-5 md:p-24">
-      <Navbar />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Navbar />
+      </Suspense>
 
       <div className="flex fixed top-[50%] translate-y-[-50%] place-items-center-">
         {/* <div className={styles.heroContent}> */}
