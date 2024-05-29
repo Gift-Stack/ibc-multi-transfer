@@ -4,10 +4,10 @@ TODO:
 - [x] Setup fucking tailwind
 - [ ] Create UI
   - [x] No wallet connected screen
-  - [ ] Connect Keplr wallet
-  - [ ] Connected screen
-    - [ ] Show Osmosis balance
-    - [ ] Switch wallet account
+  - [x] Connect Keplr wallet
+  - [x] Connected screen
+    - [x] Show Osmosis balance
+    - [x] Switch wallet account
   - [ ] Option to Send single transaction
   - [ ] Create Dialog for transaction status
   - [ ] Option to Send multiple transactions

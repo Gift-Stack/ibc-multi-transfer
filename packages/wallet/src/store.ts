@@ -10,5 +10,5 @@ export type Store = {
 export const storeAtom = atom<Store>({
   balance: undefined,
   address: undefined,
-  fetching: true,
+  fetching: false,
 });
