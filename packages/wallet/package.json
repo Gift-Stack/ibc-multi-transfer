@@ -1,17 +1,15 @@
 {
-  "name": "@milkyway-engine/ui",
+  "name": "@milkyway-engine/wallet",
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./button": "./src/button.tsx",
-    "./card": "./src/card.tsx",
-    "./code": "./src/code.tsx"
+    ".": "./src/hooks/index.ts"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
-    "generate:component": "turbo gen react-component"
+    "lint": "eslint . --max-warnings 0"
   },
   "devDependencies": {
+    "@keplr-wallet/types": "^0.12.95",
     "@milkyway-engine/eslint-config": "*",
     "@milkyway-engine/typescript-config": "*",
     "@turbo/gen": "^1.12.4",
@@ -24,6 +22,9 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "react-aria-components": "^1.2.1"
+    "@cosmjs/launchpad": "^0.27.1",
+    "@cosmjs/stargate": "^0.32.3",
+    "@keplr-wallet/unit": "^0.12.95",
+    "jotai": "^2.8.2"
   }
 }
