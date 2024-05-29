@@ -1,0 +1,22 @@
+TODO:
+
+- [x] Setup monorepo project with turborepo
+- [x] Setup fucking tailwind
+- [ ] Create UI
+  - [x] No wallet connected screen
+  - [ ] Connect Keplr wallet
+  - [ ] Connected screen
+    - [ ] Show Osmosis balance
+    - [ ] Switch wallet account
+  - [ ] Option to Send single transaction
+  - [ ] Create Dialog for transaction status
+  - [ ] Option to Send multiple transactions
+    - [ ] Create input fields for addresses
+    - [ ] Create incremental input fields for addresses (minimum of 2)
+    - [ ] Simulate transaction to estimate gas
+  - [ ] Store transactions ( txHash, target addresses, amounts, timestamps ) in indexedDB
+  - [ ] List of previous transactions ( ref: https://app.osmosis.zone/portfolio. )
+  - [ ] Implement IBC transfer from Osmosis to Cosmos
+    - [ ] Show Osmosis balance in Cosmos
+    - [ ] Display status of IBC transfer
+  - [ ] Implement IBC hook transfer using PFM from Osmosis to Cosmos to Osmosis

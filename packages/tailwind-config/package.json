@@ -1,0 +1,12 @@
+{
+  "name": "@milkyway-engine/tailwind-config",
+  "version": "0.0.0",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "tailwindcss": "^3.4.3"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.38"
+  }
+}
