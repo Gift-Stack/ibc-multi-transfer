@@ -1,8 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@milkyway-engine/ui/card";
+import { Suspense } from "react";
 import styles from "./page.module.css";
 import Navbar from "./_components/nav";
-import { Suspense } from "react";
+import TransactionList from "./_components/transactions.tsx";
+import MakePayments from "./_components/make-payments";
+import { NavbarItem, TxNavbarItem } from "./_types";
 
 function Gradient({
   conic,
@@ -51,7 +54,16 @@ const LINKS = [
   },
 ];
 
-export default function Page(): JSX.Element {
+export default function Page({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}): JSX.Element {
+  const activeTab =
+    (searchParams["active-tab"] as NavbarItem) || "make-payments";
+
+  const activeTx = (searchParams["tx"] as TxNavbarItem) || "single-tx";
+
   return (
     <main className="relative flex flex-col items-center justify-between- min-h-screen p-5 md:p-24">
       <Suspense fallback={<div>Loading...</div>}>
@@ -71,18 +83,13 @@ export default function Page(): JSX.Element {
             </div>
           </div>
 
-          {/* <Gradient className={styles.backgroundGradient} conic /> */}
+          <Gradient className={styles.backgroundGradient} conic />
         </div>
       </div>
 
       <div className="pt-8 md:pt-16 w-full max-w-[1100px]">
-        <p className="text-3xl md:text-5xl font-semibold font-mono text-left mb-5">
-          Transactions
-        </p>
-
-        <p className="text-xl font-medium">
-          Connect to see your transaction history.
-        </p>
+        {activeTab === "transactions" && <TransactionList />}
+        {activeTab === "make-payments" && <MakePayments activeTx={activeTx} />}
       </div>
 
       {/* <div className={styles.grid}>

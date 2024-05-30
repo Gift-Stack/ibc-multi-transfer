@@ -89,7 +89,7 @@ export const OsmosisChainTestnetInfo = {
 export const OsmosisChainInfo = {
   chainId: "osmosis-1",
 
-  chainName: "Osmosis Mainnet",
+  chainName: "Osmosis",
 
   rpc: "https://rpc.osmosis.zone",
 
