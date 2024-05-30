@@ -1,20 +1,17 @@
-"use client";
+import { Button as ButtonPrimitive } from "react-aria-components";
 
-import { ReactNode } from "react";
+export const Button = ({
+  children,
+  className,
 
-interface ButtonProps {
-  children: ReactNode;
-  className?: string;
-  appName: string;
-}
-
-export const Button = ({ children, className, appName }: ButtonProps) => {
+  ...props
+}: Parameters<typeof ButtonPrimitive>[number]) => {
   return (
-    <button
-      className={className}
-      onClick={() => alert(`Hello from your ${appName} app!`)}
+    <ButtonPrimitive
+      className={`w-full p-3 rounded-lg border border-callout-border disabled:opacity-30 ${className}`}
+      {...props}
     >
       {children}
-    </button>
+    </ButtonPrimitive>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 import { useConnect, useTransactions } from "@milkyway-engine/wallet";
-import React from "react";
+import { Dialog } from "@milkyway-engine/ui/dialog";
+import { Button } from "@milkyway-engine/ui/button";
 
 const SingleTransaction = () => {
   const { account, connect } = useConnect();
@@ -24,13 +25,11 @@ const SingleTransaction = () => {
           Connect wallet to send
         </button>
       ) : (
-        <button
-          onClick={sendSingleTransaction}
-          disabled={loading}
-          className="w-full p-3 rounded-lg border border-callout-border disabled:opacity-30"
-        >
-          {loading ? "Sending..." : "Send"}
-        </button>
+        <Dialog>
+          <Button onPress={() => sendSingleTransaction()} isDisabled={loading}>
+            {loading ? "Sending..." : "Send"}
+          </Button>
+        </Dialog>
       )}
     </div>
   );

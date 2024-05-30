@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@milkyway-engine/ui/button";
+import { Dialog } from "@milkyway-engine/ui/dialog";
 import React, { useState } from "react";
 
 const MultiTransaction = () => {
@@ -51,9 +53,10 @@ const MultiTransaction = () => {
             +
           </button>
         </div>
-        <button className="w-full p-3 rounded-lg border border-callout-border">
-          Send
-        </button>
+
+        <Dialog>
+          <Button>Send</Button>
+        </Dialog>
       </div>
     </div>
   );
