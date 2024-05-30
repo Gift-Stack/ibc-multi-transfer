@@ -5,10 +5,12 @@ export type Store = {
   balance: AccountBalance | undefined;
   address: string | undefined;
   fetching: boolean;
+  transactionInProgress: boolean;
 };
 
 export const storeAtom = atom<Store>({
   balance: undefined,
   address: undefined,
   fetching: false,
+  transactionInProgress: false,
 });

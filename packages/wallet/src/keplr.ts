@@ -1,8 +1,15 @@
-import { Keplr } from "@keplr-wallet/types";
-import { Dec } from "@keplr-wallet/unit";
+import { Keplr, Window as KeplrWindow } from "@keplr-wallet/types";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { OsmosisChainInfo } from "./constants";
-import { Balances, Transaction } from "./types";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { Balances } from "./types";
+import { sendTx } from "./utils/sendTx";
+import { api } from "./utils/api";
+import { simulateMsgs } from "./utils/simulateTx";
+
+declare global {
+  interface Window extends KeplrWindow {}
+}
 
 type KeplrConnectOption = {
   setError: (error: string | null) => void;
@@ -91,45 +98,53 @@ export const getBalance = async () => {
 };
 
 export const getTransactions = async (walletAddress: string) => {
-  const offlineSigner = window.keplr?.getOfflineSigner(
-    OsmosisChainInfo.chainId
-  );
-  const client: SigningStargateClient =
-    await SigningStargateClient.connectWithSigner(
-      OsmosisChainInfo.rpc,
-      offlineSigner!
-    );
-
-  // const transaction = client.searchTx([
-  //   { key: "sentFromOrTo", value: walletAddress },
-  // ]);
-  const query = `transfer.recipient='${walletAddress}' AND transfer.sender='osmo1pyssygjaj8mvu3skp7aj4q9m9hj87cnkqnheg2'`;
-  const transaction = client.searchTx([
-    // { key: "minHeight", value: 0 },
-    // { key: "maxHeight", value: 1111133539 },
-    // { key: "from", value: walletAddress },
-    // { key: "to", value: walletAddress },
-    { key: "transfer.recipient", value: walletAddress },
-    // { key: "transfer.sender", value: walletAddress },
-  ]);
-  // const transaction = await client.getTx(
-  //   "10CE638D69292F79D5DE35CBEC12371E0AD53633AF932B25BF50CC5713635C67"
-  // );
-
-  return transaction;
-
-  // if (walletAddress) {
-  //   const uri = `https://api-indexer.keplr.app/v1/history/${walletAddress}?limit=15&offset=0&chains=${OsmosisChainInfo.chainName.toLowerCase()}`;
-  //   const data = await api<Transaction[]>(uri);
-  //   return data;
-  // }
+  return [];
 };
 
-const api = async <T>(url: string, init?: RequestInit): Promise<T> => {
-  return fetch(url, init).then((response) => {
-    if (!response.ok) {
-      throw new Error(response.statusText);
+export const sendBalance = async (recipient: string, amount: string) => {
+  if (!window.keplr) return;
+
+  const key = await window.keplr.getKey(OsmosisChainInfo.chainId);
+  const protoMsgs = {
+    typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+    value: MsgSend.encode({
+      fromAddress: key.bech32Address,
+      toAddress: recipient,
+      amount: [
+        {
+          denom: "uosmo",
+          amount: DecUtils.getTenExponentN(6)
+            .mul(new Dec(amount))
+            .truncate()
+            .toString(),
+        },
+      ],
+    }).finish(),
+  };
+
+  try {
+    const gasUsed = await simulateMsgs(
+      OsmosisChainInfo,
+      key.bech32Address,
+      [protoMsgs],
+      [{ denom: "uosmo", amount: "236" }]
+    );
+
+    if (gasUsed) {
+      await sendTx(
+        window.keplr,
+        OsmosisChainInfo,
+        key.bech32Address,
+        [protoMsgs],
+        {
+          amount: [{ denom: "uosmo", amount: "236" }],
+          gas: Math.floor(gasUsed * 1.5).toString(),
+        }
+      );
     }
-    return response.json() as Promise<T>;
-  });
+  } catch (e) {
+    if (e instanceof Error) {
+      console.log(e.message);
+    }
+  }
 };
