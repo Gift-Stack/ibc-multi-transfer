@@ -12,6 +12,7 @@ import Long from "long";
 import { Buffer } from "buffer";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { SigningStargateClient } from "@cosmjs/stargate";
+import { Transaction } from "../types";
 
 export const sendTx = async (
   keplr: Keplr,
@@ -130,27 +131,19 @@ export const broadcastTxSync = async (
   return keplr.sendTx(chainId, tx, "sync" as BroadcastMode);
 };
 
-type SuccessTX = {
-  account: string;
-  txHash: string;
-  targetAddresses: string[];
-  amounts: string[];
-  timestamp: string;
-};
-
-function saveToIndexedDB(data: SuccessTX) {
+function saveToIndexedDB(data: Transaction) {
   if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB.");
   }
 
-  var request = window.indexedDB.open("MilkyWayDB", 1);
+  const request = window.indexedDB.open("MilkyWayDB", 1);
 
   request.onerror = function (event) {
     console.log("error: ");
   };
 
   request.onupgradeneeded = function (event: any) {
-    var db = request.result;
+    const db = request.result;
     if (!db.objectStoreNames.contains("transactions")) {
       db.createObjectStore("transactions", {
         keyPath: "id",
@@ -168,7 +161,7 @@ function saveToIndexedDB(data: SuccessTX) {
     const userTransactions = allTransactions.get(data.account);
 
     userTransactions.onsuccess = function () {
-      let userTx: { id: string; transactions: SuccessTX[] };
+      let userTx: { id: string; transactions: Transaction[] };
 
       if (!userTransactions.result) {
         userTx = {

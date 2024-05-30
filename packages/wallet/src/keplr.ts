@@ -2,7 +2,7 @@ import { Keplr, Window as KeplrWindow } from "@keplr-wallet/types";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { OsmosisChainInfo } from "./constants";
-import { Balances } from "./types";
+import { Balances, Transaction } from "./types";
 import { sendTx } from "./utils/sendTx";
 import { api } from "./utils/api";
 import { simulateMsgs } from "./utils/simulateTx";
@@ -97,8 +97,46 @@ export const getBalance = async () => {
   }
 };
 
-export const getTransactions = async (walletAddress: string) => {
-  return [];
+type TransactionDB = {
+  id: string;
+  transactions: Transaction[];
+};
+
+export const getTransactions = async (
+  walletAddress: string,
+  setter: (trx: Transaction[]) => void
+) => {
+  if (!window.indexedDB) {
+    window.alert("Your browser doesn't support a stable version of IndexedDB.");
+  }
+
+  const request = window.indexedDB.open("MilkyWayDB", 1);
+
+  request.onerror = function () {
+    console.log("error: ");
+  };
+
+  request.onupgradeneeded = function () {
+    const db = request.result;
+    if (!db.objectStoreNames.contains("transactions")) {
+      db.createObjectStore("transactions", {
+        keyPath: "id",
+      });
+    }
+  };
+
+  request.onsuccess = function () {
+    const db = request.result;
+    const txs = db.transaction("transactions", "readonly");
+    const store = txs.objectStore("transactions");
+    const range = IDBKeyRange.only(walletAddress);
+    const transactions = <IDBRequest<TransactionDB>>store.get(range);
+    transactions.onsuccess = function () {
+      const txs = transactions.result;
+
+      setter(txs.transactions);
+    };
+  };
 };
 
 export const sendBalance = async (recipient: string, amount: string) => {

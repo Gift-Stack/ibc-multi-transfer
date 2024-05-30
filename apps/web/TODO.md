@@ -19,7 +19,7 @@ TODO:
     - [ ] Show transaction status
     - [ ] Show transaction hash
   - [x] Store transactions ( txHash, target addresses, amounts, timestamps ) in indexedDB
-  - [ ] List of previous transactions ( ref: https://app.osmosis.zone/portfolio. )
+  - [x] List of previous transactions ( ref: https://app.osmosis.zone/portfolio. )
   - [ ] Implement IBC transfer from Osmosis to Cosmos
     - [ ] Show Osmosis balance in Cosmos
     - [ ] Display status of IBC transfer

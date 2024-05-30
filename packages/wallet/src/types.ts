@@ -20,24 +20,11 @@ export type AccountBalance = {
 };
 
 export type Transaction = {
-  chain: string;
-  count: number;
-  txResults: {
-    block_height: number;
-    tx_index: number;
-    created_at: string;
-    tx_hash: string;
-    tx_result: string;
-    tx_messages: {
-      block_height: number;
-      tx_index: number;
-      msg_index: number;
-      signer: string;
-      msg_string: string;
-      type: string;
-      code: number;
-    }[];
-  }[];
+  account: string;
+  txHash: string;
+  targetAddresses: string[];
+  amounts: string[];
+  timestamp: string;
 };
 
 export type GasSimulateResponse = {

@@ -5,14 +5,18 @@ import { storeAtom } from "../store";
 import { useBalance } from "./useBalance";
 
 export const useTransactions = () => {
-  const { address, transactionInProgress } = useAtomValue(storeAtom);
-  const { fetchBalance } = useBalance();
+  const { address, transactions, transactionInProgress } =
+    useAtomValue(storeAtom);
+  const { fetchBalance } = useBalance({ prefetch: false });
   const setStore = useSetAtom(storeAtom);
 
   useEffect(() => {
     if (address) {
-      getTransactions(address).then((transactions) => {
-        setStore((rest) => ({ ...rest, transactions }));
+      setStore((rest) => ({ ...rest, transactionInProgress: true }));
+      getTransactions(address, (trx) =>
+        setStore((rest) => ({ ...rest, transactions: trx }))
+      ).then(() => {
+        setStore((rest) => ({ ...rest, transactionInProgress: false }));
       });
     }
   }, [address]);
@@ -26,7 +30,7 @@ export const useTransactions = () => {
 
   return {
     loading: transactionInProgress,
-    transactions: [],
+    transactions,
     sendSingleTransaction,
     sendMultipleTransactions: () => {},
   };

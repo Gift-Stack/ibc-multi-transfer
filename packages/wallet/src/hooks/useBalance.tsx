@@ -3,7 +3,9 @@ import { storeAtom } from "../store";
 import { useEffect } from "react";
 import { getBalance } from "../keplr";
 
-export const useBalance = () => {
+export const useBalance = (
+  { prefetch = true }: { prefetch: boolean } = { prefetch: true }
+) => {
   const { address, balance, fetching } = useAtomValue(storeAtom);
   const setStore = useSetAtom(storeAtom);
 
@@ -19,9 +21,8 @@ export const useBalance = () => {
 
   useEffect(() => {
     if (!address) return;
-
-    fetchBalance();
-  }, [address]);
+    if (prefetch) fetchBalance();
+  }, [address, prefetch]);
 
   return {
     data: balance,
