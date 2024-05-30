@@ -7,4 +7,8 @@ tailwindConfig.theme.extend.colors = {
   "card-border": "rgb(var(--card-border-rgb))",
 };
 
+tailwindConfig.theme.extend.backgroundImage = {
+  "glow-conic": "var(--glow-conic)",
+};
+
 module.exports = tailwindConfig;

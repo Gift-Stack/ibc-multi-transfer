@@ -1,7 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { Card } from "@milkyway-engine/ui/card";
 import { Suspense } from "react";
-import styles from "./page.module.css";
 import Navbar from "./_components/nav";
 import TransactionList from "./_components/transactions.tsx";
 import MakePayments from "./_components/make-payments";
@@ -19,9 +17,9 @@ function Gradient({
   return (
     <span
       className={[
-        styles.gradient,
-        conic ? styles.glowConic : undefined,
-        small ? styles.gradientSmall : styles.gradientLarge,
+        "absolute pointer-events-none mix-blend-normal will-change-[filter]",
+        conic ? "bg-glow-conic" : undefined,
+        small ? "filter blur-[32px]" : "filter blur-[75px]",
         className,
       ]
         .filter(Boolean)
@@ -71,7 +69,6 @@ export default function Page({
       </Suspense>
 
       <div className="flex fixed top-[50%] translate-y-[-50%] place-items-center-">
-        {/* <div className={styles.heroContent}> */}
         <div className="">
           <div className="flex z-50 items-center justify-center w-full">
             <div className="absolute pointer-events-none min-w-[307px] md:min-w-[614px] min-h-[307px] md:min-h-[614px]">
@@ -83,7 +80,10 @@ export default function Page({
             </div>
           </div>
 
-          <Gradient className={styles.backgroundGradient} conic />
+          <Gradient
+            className="w-[1000px] h-[1000px] -top-[500px] opacity-15"
+            conic
+          />
         </div>
       </div>
 
@@ -91,14 +91,6 @@ export default function Page({
         {activeTab === "transactions" && <TransactionList />}
         {activeTab === "make-payments" && <MakePayments activeTx={activeTx} />}
       </div>
-
-      {/* <div className={styles.grid}>
-        {LINKS.map(({ title, href, description }) => (
-          <Card className={styles.card} href={href} key={title} title={title}>
-            {description}
-          </Card>
-        ))}
-      </div> */}
     </main>
   );
 }

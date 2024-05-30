@@ -9,11 +9,15 @@ TODO:
     - [x] Show Osmosis balance
     - [x] Switch wallet account
   - [ ] Option to Send single transaction
+    - [x] UI
   - [ ] Create Dialog for transaction status
   - [ ] Option to Send multiple transactions
-    - [ ] Create input fields for addresses
-    - [ ] Create incremental input fields for addresses (minimum of 2)
+    - [x] UI
+    - [x] Create input fields for addresses
+    - [x] Create incremental input fields for addresses (minimum of 2)
     - [ ] Simulate transaction to estimate gas
+    - [ ] Show transaction status
+    - [ ] Show transaction hash
   - [ ] Store transactions ( txHash, target addresses, amounts, timestamps ) in indexedDB
   - [ ] List of previous transactions ( ref: https://app.osmosis.zone/portfolio. )
   - [ ] Implement IBC transfer from Osmosis to Cosmos
