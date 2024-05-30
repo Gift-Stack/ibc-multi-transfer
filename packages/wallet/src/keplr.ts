@@ -130,16 +130,23 @@ export const getTransactions = async (
     const txs = db.transaction("transactions", "readonly");
     const store = txs.objectStore("transactions");
     const range = IDBKeyRange.only(walletAddress);
-    const transactions = <IDBRequest<TransactionDB>>store.get(range);
+    const transactions = <IDBRequest<TransactionDB | undefined>>(
+      store.get(range)
+    );
     transactions.onsuccess = function () {
       const txs = transactions.result;
+
+      if (!txs) {
+        setter([]);
+        return;
+      }
 
       setter(txs.transactions);
     };
   };
 };
 
-export const sendBalance = async (recipient: string, amount: string) => {
+export const sendBalance = async (recipient: string, amount: `${number}`) => {
   if (!window.keplr) return;
 
   const key = await window.keplr.getKey(OsmosisChainInfo.chainId);
@@ -151,7 +158,9 @@ export const sendBalance = async (recipient: string, amount: string) => {
       amount: [
         {
           denom: "uosmo",
-          amount: DecUtils.getTenExponentN(6)
+          amount: DecUtils.getTenExponentN(
+            OsmosisChainInfo.feeCurrencies[0]?.coinDecimals || 6
+          )
             .mul(new Dec(amount))
             .truncate()
             .toString(),
@@ -169,16 +178,17 @@ export const sendBalance = async (recipient: string, amount: string) => {
     );
 
     if (gasUsed) {
-      await sendTx(
-        window.keplr,
-        OsmosisChainInfo,
-        key.bech32Address,
-        [protoMsgs],
-        {
+      await sendTx({
+        keplr: window.keplr,
+        chainInfo: OsmosisChainInfo,
+        sender: key.bech32Address,
+        proto: [protoMsgs],
+        fee: {
           amount: [{ denom: "uosmo", amount: "236" }],
           gas: Math.floor(gasUsed * 1.5).toString(),
-        }
-      );
+        },
+        decryptedAmount: amount,
+      });
     }
   } catch (e) {
     if (e instanceof Error) {

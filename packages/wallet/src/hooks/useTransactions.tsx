@@ -21,9 +21,9 @@ export const useTransactions = () => {
     }
   }, [address]);
 
-  const sendSingleTransaction = async () => {
+  const sendSingleTransaction = async (amount: `${number}`) => {
     setStore((rest) => ({ ...rest, transactionInProgress: true }));
-    await sendBalance(address!, "0.0001");
+    await sendBalance(address!, amount);
     await fetchBalance();
     setStore((rest) => ({ ...rest, transactionInProgress: false }));
   };

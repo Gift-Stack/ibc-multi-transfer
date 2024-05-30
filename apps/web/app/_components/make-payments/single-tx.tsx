@@ -6,11 +6,12 @@ import { Button } from "@milkyway-engine/ui/button";
 const SingleTransaction = () => {
   const { account, connect } = useConnect();
   const { loading, sendSingleTransaction } = useTransactions();
+  const amountToSend = "0.0001";
 
   return (
     <div className="flex flex-col items-center justify-center w-full py-4">
       <p className="italic text-sm pb-5 font-medium">
-        Attention: You are about to send 0.0001 OSMO to this address
+        Attention: You are about to send {amountToSend} OSMO to this address
       </p>
 
       <p className="py-3 px-3 mb-5 rounded-xl bg-card w-full truncate">
@@ -26,7 +27,10 @@ const SingleTransaction = () => {
         </button>
       ) : (
         <Dialog>
-          <Button onPress={() => sendSingleTransaction()} isDisabled={loading}>
+          <Button
+            onPress={() => sendSingleTransaction(amountToSend)}
+            isDisabled={loading}
+          >
             {loading ? "Sending..." : "Send"}
           </Button>
         </Dialog>

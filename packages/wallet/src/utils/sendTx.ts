@@ -14,14 +14,25 @@ import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { Transaction } from "../types";
 
-export const sendTx = async (
-  keplr: Keplr,
-  chainInfo: ChainInfo,
-  sender: string,
-  proto: Any[],
-  fee: StdFee,
-  memo: string = ""
-) => {
+type SendTxOption = {
+  keplr: Keplr;
+  chainInfo: ChainInfo;
+  sender: string;
+  proto: Any[];
+  fee: StdFee;
+  memo?: string;
+  decryptedAmount: `${number}`;
+};
+
+export const sendTx = async ({
+  keplr,
+  chainInfo,
+  sender,
+  proto,
+  fee,
+  memo = "",
+  decryptedAmount,
+}: SendTxOption) => {
   const account = await fetchAccountInfo(chainInfo, sender);
   const { pubKey } = await keplr.getKey(chainInfo.chainId);
 
@@ -93,7 +104,7 @@ export const sendTx = async (
       account: sender,
       txHash: "",
       targetAddresses: [sender],
-      amounts: ["0.001"],
+      amounts: [decryptedAmount],
       timestamp: new Date().toISOString(),
     });
   }
