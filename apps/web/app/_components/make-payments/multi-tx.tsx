@@ -54,7 +54,11 @@ const MultiTransaction = () => {
           </button>
         </div>
 
-        <Dialog>
+        <Dialog
+          status="pending"
+          label="Initializing transaction"
+          description="Your transfer is currently being processed."
+        >
           <Button>Send</Button>
         </Dialog>
       </div>

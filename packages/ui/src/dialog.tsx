@@ -3,12 +3,31 @@ import {
   Button,
   Dialog as DialogPrimitive,
   DialogTrigger,
-  Heading,
   Modal as ModalPrimitive,
   ModalOverlay,
+  Heading,
 } from "react-aria-components";
+import { Button as UIButton } from "./button";
 
-export function Dialog({ children }: { children: ReactNode }) {
+type Status = "pending" | "success" | "error" | "idle";
+
+export function Dialog({
+  children,
+  status,
+  label,
+  description,
+}: {
+  children: ReactNode;
+  status: Status;
+  label?: string;
+  description?: string;
+}) {
+  const iconClassNames = {
+    pending: "bg-blue-100 text-blue-500 animate-spin",
+    success: "bg-green-100 text-green-500",
+    error: "bg-red-100 text-red-500",
+    idle: "hidden",
+  };
   return (
     <DialogTrigger>
       {children}
@@ -34,22 +53,35 @@ export function Dialog({ children }: { children: ReactNode }) {
                   slot="title"
                   className="text-xxl font-semibold leading-6 my-0 text-slate-700"
                 >
-                  Transaction in progress...
+                  Transaction status
                 </Heading>
-                <div className="w-6 h-6 text-red-500 absolute right-0 top-0 stroke-2">
-                  {/* <AlertIcon size="M" /> */}
+                <div className="grid gap-4 py-6">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={"rounded-full p-2 " + iconClassNames[status]}
+                    >
+                      {status === "pending" && (
+                        <LoaderIcon className="h-6 w-6" />
+                      )}
+                      {status === "success" && (
+                        <CheckIcon className="h-6 w-6" />
+                      )}
+                      {status === "error" && <XIcon className="h-6 w-6" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-lg text-black font-medium">{label}</p>
+                      <p className="text-sm text-gray-500">{description}</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="mt-3 text-slate-500">
-                  Are you sure you want to delete "Documents"? All contents will
-                  be permanently destroyed.
-                </p>
-                <div className="mt-6 flex justify-end gap-2">
-                  <DialogButton
-                    className="bg-slate-200 text-slate-800 hover:border-slate-300 pressed:bg-slate-300"
+
+                <div className="flex justify-end">
+                  <UIButton
                     onPress={close}
+                    className="text-black py-3 px-5 text-sm max-w-max"
                   >
                     Close
-                  </DialogButton>
+                  </UIButton>
                 </div>
               </>
             )}
@@ -69,5 +101,70 @@ function DialogButton({
       {...props}
       className={`inline-flex justify-center rounded-md border border-solid border-transparent px-5 py-2 font-semibold font-[inherit] text-base transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2 ${className}`}
     />
+  );
+}
+
+function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+function LoaderIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2v4" />
+      <path d="m16.2 7.8 2.9-2.9" />
+      <path d="M18 12h4" />
+      <path d="m16.2 16.2 2.9 2.9" />
+      <path d="M12 18v4" />
+      <path d="m4.9 19.1 2.9-2.9" />
+      <path d="M2 12h4" />
+      <path d="m4.9 4.9 2.9 2.9" />
+    </svg>
+  );
+}
+
+function XIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
   );
 }

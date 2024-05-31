@@ -22,6 +22,13 @@ type SendTxOption = {
   fee: StdFee;
   memo?: string;
   decryptedAmount: `${number}`;
+  setStatus: (status: TransactionStatus) => void;
+};
+
+type TransactionStatus = {
+  status: "error" | "pending" | "idle" | "success";
+  label: string;
+  description: string;
 };
 
 export const sendTx = async ({
@@ -32,6 +39,7 @@ export const sendTx = async ({
   fee,
   memo = "",
   decryptedAmount,
+  setStatus,
 }: SendTxOption) => {
   const account = await fetchAccountInfo(chainInfo, sender);
   const { pubKey } = await keplr.getKey(chainInfo.chainId);
@@ -89,23 +97,51 @@ export const sendTx = async ({
 
     const txHash = await broadcastTxSync(keplr, chainInfo.chainId, signedTx.tx);
 
+    setStatus({
+      label: "Transaction committing",
+      description: "Your transaction is being committed to the blockchain",
+      status: "pending",
+    });
+
     const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
 
-    txTracer.addEventListener("message", (event) => {
-      console.log("eventMessage", event);
-      console.log("REASDY_STATE", txTracer.readyState);
-    });
-
     txTracer.traceTx(txHash).then((tx) => {
-      alert("Transaction commit successfully");
+      setStatus({
+        label: "Transaction commit successful",
+        description: "Your transaction has been committed to the blockchain",
+        status: "pending",
+      });
     });
 
-    saveToIndexedDB({
-      account: sender,
-      txHash: "",
-      targetAddresses: [sender],
-      amounts: [decryptedAmount],
-      timestamp: new Date().toISOString(),
+    txTracer.addEventListener("message", (event) => {
+      const parsedData = JSON.parse(event.data);
+
+      if (parsedData.result?.hash) {
+        saveToIndexedDB({
+          account: sender,
+          txHash: parsedData.result.hash,
+          targetAddresses: [sender],
+          amounts: [decryptedAmount],
+          timestamp: new Date().toISOString(),
+        });
+
+        setStatus({
+          label: "Transaction completed",
+          description: `Your transfer of ${decryptedAmount} OSMO was successful.`,
+          status: "success",
+        });
+        return;
+      }
+
+      // -32603 is unsigned tx not found
+      if (parsedData.error && parsedData.error.code !== -32603) {
+        setStatus({
+          label: parsedData.error.message || "Transaction failed",
+          description: parsedData.error.data,
+          status: "error",
+        });
+        return;
+      }
     });
   }
 };

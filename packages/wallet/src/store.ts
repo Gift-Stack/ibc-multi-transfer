@@ -7,6 +7,11 @@ export type Store = {
   fetching: boolean;
   transactions: Transaction[];
   transactionInProgress: boolean;
+  transactionStatus: {
+    status: "pending" | "success" | "error" | "idle";
+    label: string;
+    description: string;
+  };
 };
 
 export const storeAtom = atom<Store>({
@@ -15,4 +20,9 @@ export const storeAtom = atom<Store>({
   fetching: false,
   transactions: [],
   transactionInProgress: false,
+  transactionStatus: {
+    status: "idle",
+    label: "",
+    description: "",
+  },
 });

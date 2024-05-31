@@ -146,7 +146,17 @@ export const getTransactions = async (
   };
 };
 
-export const sendBalance = async (recipient: string, amount: `${number}`) => {
+type TransactionStatus = {
+  status: "error" | "pending" | "idle" | "success";
+  label: string;
+  description: string;
+};
+
+export const sendBalance = async (
+  recipient: string,
+  amount: `${number}`,
+  setStatus: (status: TransactionStatus) => void
+) => {
   if (!window.keplr) return;
 
   const key = await window.keplr.getKey(OsmosisChainInfo.chainId);
@@ -188,11 +198,19 @@ export const sendBalance = async (recipient: string, amount: `${number}`) => {
           gas: Math.floor(gasUsed * 1.5).toString(),
         },
         decryptedAmount: amount,
+        setStatus,
       });
     }
   } catch (e) {
     if (e instanceof Error) {
       console.log(e.message);
+      setStatus({
+        description: e.message,
+        label: "An Error occured",
+        status: "error",
+      });
     }
+
+    throw e;
   }
 };
