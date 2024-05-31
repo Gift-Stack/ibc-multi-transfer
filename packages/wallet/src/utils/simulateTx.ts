@@ -12,6 +12,7 @@ import { Buffer } from "buffer";
 import { fetchAccountInfo } from "./sendTx";
 import { GasSimulateResponse } from "../types";
 import { OsmosisChainInfo } from "../constants";
+import { api } from "./api";
 
 export const simulateMsgs = async (
   chainInfo: ChainInfo,
@@ -64,8 +65,7 @@ export const simulateMsgs = async (
       signatures: [new Uint8Array(64)],
     }).finish();
 
-    // Odd API: returns error but doesn't throw it. -- Would be checking if response satisfies an error.
-    const response = await fetch(
+    const simulatedResult = await api<GasSimulateResponse>(
       `${OsmosisChainInfo.rest}/cosmos/tx/v1beta1/simulate`,
       {
         method: "POST",
@@ -78,20 +78,10 @@ export const simulateMsgs = async (
       }
     );
 
-    const simulatedResult = await response.json();
-
-    if (simulatedResult.code) {
-      throw new Error(simulatedResult.message, {
-        cause: "An error occurred while simulating transaction.",
-      });
-    }
-
-    const gasUsed = parseInt(
-      (simulatedResult satisfies GasSimulateResponse)?.gas_info?.gas_used
-    );
+    const gasUsed = parseInt(simulatedResult.gas_info.gas_used);
     if (Number.isNaN(gasUsed)) {
       throw new Error(
-        `Invalid integer gas: ${simulatedResult?.gas_info?.gas_used}`
+        `Invalid integer gas: ${simulatedResult.gas_info.gas_used}`
       );
     }
 
