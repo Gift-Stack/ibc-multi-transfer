@@ -26,6 +26,10 @@ export const useTransactions = () => {
     addresses: string[],
     amounts: `${number}`[]
   ) => {
+    if (addresses.length !== amounts.length) {
+      throw new Error("addresses and amounts must have the same length"); // Won't happen in the UI, but it's a good idea to check anyway
+    }
+
     const cummulativeAmount = amounts.reduce(
       (acc, curr) => Number(acc) + Number(curr),
       0

@@ -9,7 +9,7 @@ type NavbarItemProps = {
 
 export const URLNavbar = ({ children }: PropsWithChildren) => {
   return (
-    <div className="relative p-2 rounded-xl bg-callout border border-callout-border max-w-max mx-auto md:mx-0 space-x-3 font-mono">
+    <div className="relative text-center w-full p-2 rounded-xl bg-callout border border-callout-border max-w-max mx-auto md:mx-0 gap-3 font-mono">
       {children}
     </div>
   );

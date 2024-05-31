@@ -21,7 +21,8 @@ type SendTxOption = {
   proto: Any[];
   fee: StdFee;
   memo?: string;
-  decryptedAmount: `${number}`;
+  decryptedAmounts: `${number}`[];
+  decryptedAddresses: string[];
   setStatus: (status: TransactionStatus) => void;
 };
 
@@ -38,112 +39,120 @@ export const sendTx = async ({
   proto,
   fee,
   memo = "",
-  decryptedAmount,
+  decryptedAmounts,
+  decryptedAddresses,
   setStatus,
 }: SendTxOption) => {
   const account = await fetchAccountInfo(chainInfo, sender);
   const { pubKey } = await keplr.getKey(chainInfo.chainId);
 
-  if (account) {
-    const signDoc = {
-      bodyBytes: TxBody.encode(
-        TxBody.fromPartial({
-          messages: proto,
-          memo,
-        })
-      ).finish(),
-      authInfoBytes: AuthInfo.encode({
-        signerInfos: [
-          {
-            publicKey: {
-              typeUrl: "/cosmos.crypto.secp256k1.PubKey",
-              value: PubKey.encode({
-                key: pubKey,
-              }).finish(),
-            },
-            modeInfo: {
-              single: {
-                mode: SignMode.SIGN_MODE_DIRECT,
-              },
-              multi: undefined,
-            },
-            sequence: account.sequence,
+  if (!account) return;
+  const signDoc = {
+    bodyBytes: TxBody.encode(
+      TxBody.fromPartial({
+        messages: proto,
+        memo,
+      })
+    ).finish(),
+    authInfoBytes: AuthInfo.encode({
+      signerInfos: [
+        {
+          publicKey: {
+            typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+            value: PubKey.encode({
+              key: pubKey,
+            }).finish(),
           },
-        ],
-        fee: Fee.fromPartial({
-          amount: fee.amount.map((coin) => {
-            return {
-              denom: coin.denom,
-              amount: coin.amount.toString(),
-            };
-          }),
-          gasLimit: fee.gas,
+          modeInfo: {
+            single: {
+              mode: SignMode.SIGN_MODE_DIRECT,
+            },
+            multi: undefined,
+          },
+          sequence: account.sequence,
+        },
+      ],
+      fee: Fee.fromPartial({
+        amount: fee.amount.map((coin) => {
+          return {
+            denom: coin.denom,
+            amount: coin.amount.toString(),
+          };
         }),
-      }).finish(),
-      chainId: chainInfo.chainId,
-      accountNumber: Long.fromString(account.account_number),
-    };
+        gasLimit: fee.gas,
+      }),
+    }).finish(),
+    chainId: chainInfo.chainId,
+    accountNumber: Long.fromString(account.account_number),
+  };
 
-    const signed = await keplr.signDirect(chainInfo.chainId, sender, signDoc);
+  const signed = await keplr.signDirect(chainInfo.chainId, sender, signDoc);
 
-    const signedTx = {
-      tx: TxRaw.encode({
-        bodyBytes: signed.signed.bodyBytes,
-        authInfoBytes: signed.signed.authInfoBytes,
-        signatures: [Buffer.from(signed.signature.signature, "base64")],
-      }).finish(),
-      signDoc: signed.signed,
-    };
+  const signedTx = {
+    tx: TxRaw.encode({
+      bodyBytes: signed.signed.bodyBytes,
+      authInfoBytes: signed.signed.authInfoBytes,
+      signatures: [Buffer.from(signed.signature.signature, "base64")],
+    }).finish(),
+    signDoc: signed.signed,
+  };
 
-    const txHash = await broadcastTxSync(keplr, chainInfo.chainId, signedTx.tx);
+  const txHash = await broadcastTxSync(keplr, chainInfo.chainId, signedTx.tx);
 
+  setStatus({
+    label: "Transaction committing",
+    description: "Your transaction is being committed to the blockchain",
+    status: "pending",
+  });
+
+  const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+
+  await txTracer.traceTx(txHash).then(() => {
     setStatus({
-      label: "Transaction committing",
-      description: "Your transaction is being committed to the blockchain",
+      label: "Transaction commit successful",
+      description: "Your transaction has been committed to the blockchain",
       status: "pending",
     });
+  });
 
-    const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+  txTracer.addEventListener("message", (event) => {
+    const parsedData = JSON.parse(event.data);
 
-    txTracer.traceTx(txHash).then((tx) => {
-      setStatus({
-        label: "Transaction commit successful",
-        description: "Your transaction has been committed to the blockchain",
-        status: "pending",
+    if (parsedData.result?.hash) {
+      const cumulativeAmount = decryptedAmounts.reduce(
+        (acc, curr) => Number(acc) + Number(curr),
+        0
+      );
+      const parsedCumulativeAmout = cumulativeAmount.toLocaleString(undefined, {
+        maximumFractionDigits: 6,
       });
-    });
 
-    txTracer.addEventListener("message", (event) => {
-      const parsedData = JSON.parse(event.data);
+      saveToIndexedDB({
+        account: sender,
+        txHash: parsedData.result.hash,
+        targetAddresses: decryptedAddresses,
+        amounts: decryptedAmounts,
+        timestamp: new Date().toISOString(),
+      });
 
-      if (parsedData.result?.hash) {
-        saveToIndexedDB({
-          account: sender,
-          txHash: parsedData.result.hash,
-          targetAddresses: [sender],
-          amounts: [decryptedAmount],
-          timestamp: new Date().toISOString(),
-        });
+      setStatus({
+        label: "Transaction completed",
+        description: `Your transfer of ${parsedCumulativeAmout} OSMO was successful.`,
+        status: "success",
+      });
+      return;
+    }
 
-        setStatus({
-          label: "Transaction completed",
-          description: `Your transfer of ${decryptedAmount} OSMO was successful.`,
-          status: "success",
-        });
-        return;
-      }
-
-      // -32603 is unsigned tx not found
-      if (parsedData.error && parsedData.error.code !== -32603) {
-        setStatus({
-          label: parsedData.error.message || "Transaction failed",
-          description: parsedData.error.data,
-          status: "error",
-        });
-        return;
-      }
-    });
-  }
+    // -32603 is unsigned tx not found
+    if (parsedData.error && parsedData.error.code !== -32603) {
+      setStatus({
+        label: parsedData.error.message || "Transaction failed",
+        description: parsedData.error.data,
+        status: "error",
+      });
+      return;
+    }
+  });
 };
 
 export const fetchAccountInfo = async (

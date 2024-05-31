@@ -179,11 +179,6 @@ export const sendBalance = async (
     }).finish(),
   }));
 
-  const cumulativeAmount = amounts.reduce(
-    (acc, curr) => Number(acc) + Number(curr),
-    0
-  );
-
   try {
     const gasUsed = await simulateMsgs(
       OsmosisChainInfo,
@@ -202,9 +197,8 @@ export const sendBalance = async (
           amount: [{ denom: "uosmo", amount: "236" }],
           gas: Math.floor(gasUsed * 1.5).toString(),
         },
-        decryptedAmount: cumulativeAmount.toLocaleString(undefined, {
-          maximumFractionDigits: 6,
-        }) as `${number}`,
+        decryptedAddresses: recipients,
+        decryptedAmounts: amounts,
         setStatus,
       });
     }

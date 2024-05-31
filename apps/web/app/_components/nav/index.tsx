@@ -17,7 +17,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={`flex items-center justify-between items-centertext-sm max-w-[1100px] w-full z-[2] font-mono`}
+      className={`flex flex-col md:flex-row items-center justify-between text-sm md:text-base gap-2 max-w-[1100px] w-full z-[2] font-mono`}
     >
       <URLNavbar>
         <URLNavbarItem

@@ -41,11 +41,20 @@ const Table = ({ transactions }: { transactions: Transaction[] }) => {
 };
 
 const TransactionRow = ({ transaction }: { transaction: Transaction }) => {
-  const targetAddresses = transaction.targetAddresses.join(", ");
+  const targetAddresses = transaction.targetAddresses.join("\n");
 
-  const amounts = transaction.amounts.join(", ");
+  const amounts = transaction.amounts.join("\n");
 
-  const transactionTime = new Date(transaction.timestamp).toLocaleDateString();
+  const transactionTime = new Date(transaction.timestamp).toLocaleDateString(
+    "en-US",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    }
+  );
   return (
     <Row className="hover:bg-gray-800 transition-all duration-300 ease-in-out">
       <Cell className="pr-6 py-4 flex items-center gap-2">
