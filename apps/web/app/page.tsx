@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { Suspense } from "react";
-import Navbar from "./_components/nav";
 import TransactionList from "./_components/transactions.tsx";
 import MakePayments from "./_components/make-payments";
 import { NavbarItem, TxNavbarItem } from "./_types";
+import Navbar from "./_components/nav";
 
 function Gradient({
   conic,

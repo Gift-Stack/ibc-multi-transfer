@@ -6,16 +6,20 @@ import { getBalance } from "../keplr";
 export const useBalance = (
   { prefetch = true }: { prefetch: boolean } = { prefetch: true }
 ) => {
-  const { address, balance, fetching } = useAtomValue(storeAtom);
+  const { address, balance, fetchingBalance } = useAtomValue(storeAtom);
   const setStore = useSetAtom(storeAtom);
 
   const fetchBalance = async () => {
     try {
-      setStore((rest) => ({ ...rest, fetching: true }));
+      setStore((rest) => ({ ...rest, fetchingBalance: true }));
       const balance_ = await getBalance();
-      setStore((rest) => ({ ...rest, balance: balance_, fetching: false }));
+      setStore((rest) => ({
+        ...rest,
+        balance: balance_,
+        fetchingBalance: false,
+      }));
     } catch (error) {
-      setStore((rest) => ({ ...rest, fetching: false }));
+      setStore((rest) => ({ ...rest, fetchingBalance: false }));
     }
   };
 
@@ -27,6 +31,6 @@ export const useBalance = (
   return {
     data: balance,
     fetchBalance,
-    fetching,
+    fetchingBalance,
   };
 };

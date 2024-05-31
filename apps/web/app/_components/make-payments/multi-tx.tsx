@@ -14,6 +14,7 @@ const MultiTransaction = () => {
     sendTransaction,
     resetTransactionStatus,
   } = useTransactions();
+
   const amountToSend = "0.0001";
 
   const handleAddressChange = (
@@ -31,7 +32,9 @@ const MultiTransaction = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full py-6">
-      <p className="font-medium mb-4">Enter addresses to send to</p>
+      <p className="font-medium mb-4">
+        Enter addresses to send {amountToSend} to... each!
+      </p>
 
       <div className="flex flex-col space-y-4 w-full">
         {Array(inputs)

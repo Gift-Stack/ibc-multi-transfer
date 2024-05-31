@@ -12,20 +12,15 @@ export const useConnect = () => {
     setStore((rest) => ({ ...rest, address }));
 
   const connectWallet = () => {
-    setStore((rest) => ({ ...rest, fetching: true }));
-    connectKeplr({ setError, setAccount })
-      .then(() => {
-        setStore((rest) => ({ ...rest, fetching: false }));
-      })
-      .catch(() => {
-        setStore((rest) => ({ ...rest, fetching: false }));
-      });
+    connectKeplr({ setError, setAccount });
   };
 
   useEffect(() => {
     window.addEventListener("keplr_keystorechange", () => {
       connectWallet();
     });
+
+    connectWallet();
   }, []);
 
   return {

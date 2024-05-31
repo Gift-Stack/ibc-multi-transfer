@@ -4,7 +4,7 @@ import { AccountBalance, Transaction } from "./types";
 export type Store = {
   balance: AccountBalance | undefined;
   address: string | undefined;
-  fetching: boolean;
+  fetchingBalance: boolean;
   transactions: Transaction[];
   transactionInProgress: boolean;
   transactionStatus: {
@@ -17,7 +17,7 @@ export type Store = {
 export const storeAtom = atom<Store>({
   balance: undefined,
   address: undefined,
-  fetching: false,
+  fetchingBalance: false,
   transactions: [],
   transactionInProgress: false,
   transactionStatus: {

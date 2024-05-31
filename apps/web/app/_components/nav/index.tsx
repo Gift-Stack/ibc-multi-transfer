@@ -1,19 +1,16 @@
 "use client";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useBalance, useConnect } from "@milkyway-engine/wallet";
 import { NavbarItem, navbarItem } from "../../_types";
 import {
   URLNavbar,
   NavbarItem as URLNavbarItem,
 } from "@milkyway-engine/ui/nav";
+import dynamic from "next/dynamic";
+
+const ConnectButton = dynamic(() => import("./connect-button"), { ssr: false });
 
 const Navbar = () => {
   const searchParams = useSearchParams();
-  const { account, connect } = useConnect();
-  const { data: balance, fetching: loadingBalance } = useBalance();
-
-  const parsedBalance = `${balance?.value.toString(balance.decimals) ?? "0"} OSMO`;
 
   const active =
     (searchParams.get("active-tab") as NavbarItem) || "make-payments";
@@ -35,18 +32,7 @@ const Navbar = () => {
         />
       </URLNavbar>
 
-      {loadingBalance ? (
-        "Loading..."
-      ) : account ? (
-        parsedBalance
-      ) : (
-        <button
-          onClick={connect}
-          className="hidden md:block bg-callout border border-callout-border rounded-xl px-4 py-3.5 text-sm text-white"
-        >
-          Connect Wallet
-        </button>
-      )}
+      <ConnectButton />
     </div>
   );
 };

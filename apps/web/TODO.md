@@ -2,7 +2,7 @@ TODO:
 
 - [x] Setup monorepo project with turborepo
 - [x] Setup fucking tailwind
-- [ ] Create UI
+- [x] Create UI
   - [x] No wallet connected screen
   - [x] Connect Keplr wallet
   - [x] Connected screen
@@ -11,7 +11,7 @@ TODO:
   - [x] Option to Send single transaction
     - [x] UI
   - [x] Create Dialog for transaction status
-  - [ ] Option to Send multiple transactions
+  - [x] Option to Send multiple transactions
     - [x] UI
     - [x] Create input fields for addresses
     - [x] Create incremental input fields for addresses (minimum of 2)

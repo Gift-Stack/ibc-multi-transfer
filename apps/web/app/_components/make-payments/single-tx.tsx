@@ -14,7 +14,7 @@ const SingleTransaction = () => {
   const amountToSend = "0.0001";
 
   return (
-    <div className="flex flex-col items-center justify-center w-full py-4">
+    <div className="flex flex-col items-center justify-center w-full py-6">
       <p className="italic text-sm pb-5 font-medium">
         Attention: You are about to send {amountToSend} OSMO to this address
       </p>
