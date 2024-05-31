@@ -20,7 +20,7 @@ TODO:
     - [x] Show transaction hash
   - [x] Store transactions ( txHash, target addresses, amounts, timestamps ) in indexedDB
   - [x] List of previous transactions ( ref: https://app.osmosis.zone/portfolio. )
-  - [ ] Migrate to Tanstack Query
+  - [x] Migrate to Tanstack Query
   - [ ] Implement IBC transfer from Osmosis to Cosmos
     - [ ] Show Osmosis balance in Cosmos
     - [ ] Display status of IBC transfer

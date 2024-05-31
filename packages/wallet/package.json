@@ -25,7 +25,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@cosmjs/launchpad": "^0.27.1",
     "@cosmjs/stargate": "^0.32.3",
     "@keplr-wallet/cosmos": "^0.12.95",
     "@keplr-wallet/proto-types": "^0.12.95",

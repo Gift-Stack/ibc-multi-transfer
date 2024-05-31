@@ -47,7 +47,7 @@ export const connectKeplr = async () => {
   if (!keplr) return undefined;
 
   await keplr.experimentalSuggestChain(OsmosisChainInfo);
-  const key = await window.keplr?.getKey(OsmosisChainInfo.chainId);
+  const key = await keplr?.getKey(OsmosisChainInfo.chainId);
   if (key) {
     return key.bech32Address;
   }
