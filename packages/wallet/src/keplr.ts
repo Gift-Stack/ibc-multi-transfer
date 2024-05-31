@@ -44,13 +44,25 @@ export const getKeplrFromWindow: () => Promise<
 export const connectKeplr = async () => {
   const keplr = await getKeplrFromWindow();
 
-  if (!keplr) return undefined;
+  if (!keplr) {
+    alert("Please install Keplr extension");
+    throw new Error("Keplr extension not found");
+  }
 
   await keplr.experimentalSuggestChain(OsmosisChainInfo);
-  const key = await keplr?.getKey(OsmosisChainInfo.chainId);
+  const key = await keplr.getKey(OsmosisChainInfo.chainId);
   if (key) {
+    window.localStorage.setItem("milkywayConnectedAccounts", key.bech32Address);
     return key.bech32Address;
   }
+};
+
+export const disconnectKeplr = async () => {
+  const keplr = await getKeplrFromWindow();
+
+  window.localStorage.removeItem("milkywayConnectedAccounts");
+  await keplr?.disable();
+  return true;
 };
 
 export const getBalance = async () => {
