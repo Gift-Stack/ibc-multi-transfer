@@ -1,5 +1,6 @@
 import {
   sendTransaction as sendTransactionPrimitive,
+  sendIBCTransferFromOsmosisToCosmos,
   getTransactions,
 } from "../utils/transactions";
 import { useBalance } from "./useBalance";
@@ -68,6 +69,18 @@ export const useTransactions = (
     await sendTransactionPrimitive(addresses, amounts, setStatus);
   };
 
+  const sendIBCTransferFn = async (data: {
+    recipient: string;
+    amount: `${number}`;
+  }) => {
+    setStatus({
+      ...initialTransactionStatus,
+      label: "Initiating IBC transfer",
+    });
+
+    await sendIBCTransferFromOsmosisToCosmos({ ...data, setStatus });
+  };
+
   const { data: transactions = [], isLoading: fetchingTransactions } = useQuery(
     {
       queryKey: ["transactions", address],
@@ -94,16 +107,35 @@ export const useTransactions = (
     },
   });
 
+  const { mutate: setIbcTransaction, isPending: isIbcLoading } = useMutation({
+    mutationFn: sendIBCTransferFn,
+    onSuccess: async () => {
+      await fetchBalance();
+    },
+    onError: (err) => {
+      setStatus({
+        description: err.message,
+        label: err.cause
+          ? typeof err.cause === "string"
+            ? err.cause
+            : (err.cause as any)?.message
+          : "An Error occured",
+        status: "error",
+      });
+    },
+  });
+
   const resetTransactionStatus = () => {
     setStatus(idleTransactionStatu);
   };
 
   return {
-    loading,
+    loading: loading || isIbcLoading,
     fetchingTransactions,
     transactions,
     transactionStatus,
     sendTransaction,
+    setIbcTransaction,
     resetTransactionStatus,
   };
 };
