@@ -153,14 +153,14 @@ type TransactionStatus = {
 };
 
 export const sendBalance = async (
-  recipient: string,
-  amount: `${number}`,
+  recipients: string[],
+  amounts: `${number}`[],
   setStatus: (status: TransactionStatus) => void
 ) => {
   if (!window.keplr) return;
 
   const key = await window.keplr.getKey(OsmosisChainInfo.chainId);
-  const protoMsgs = {
+  const protoMsgs = recipients.map((recipient, index) => ({
     typeUrl: "/cosmos.bank.v1beta1.MsgSend",
     value: MsgSend.encode({
       fromAddress: key.bech32Address,
@@ -171,19 +171,24 @@ export const sendBalance = async (
           amount: DecUtils.getTenExponentN(
             OsmosisChainInfo.feeCurrencies[0]?.coinDecimals || 6
           )
-            .mul(new Dec(amount))
+            .mul(new Dec(amounts[index]!))
             .truncate()
             .toString(),
         },
       ],
     }).finish(),
-  };
+  }));
+
+  const cumulativeAmount = amounts.reduce(
+    (acc, curr) => Number(acc) + Number(curr),
+    0
+  );
 
   try {
     const gasUsed = await simulateMsgs(
       OsmosisChainInfo,
       key.bech32Address,
-      [protoMsgs],
+      protoMsgs,
       [{ denom: "uosmo", amount: "236" }]
     );
 
@@ -192,18 +197,19 @@ export const sendBalance = async (
         keplr: window.keplr,
         chainInfo: OsmosisChainInfo,
         sender: key.bech32Address,
-        proto: [protoMsgs],
+        proto: protoMsgs,
         fee: {
           amount: [{ denom: "uosmo", amount: "236" }],
           gas: Math.floor(gasUsed * 1.5).toString(),
         },
-        decryptedAmount: amount,
+        decryptedAmount: cumulativeAmount.toLocaleString(undefined, {
+          maximumFractionDigits: 6,
+        }) as `${number}`,
         setStatus,
       });
     }
   } catch (e) {
     if (e instanceof Error) {
-      console.log(e.message);
       setStatus({
         description: e.message,
         label: "An Error occured",

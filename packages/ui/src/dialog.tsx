@@ -16,11 +16,15 @@ export function Dialog({
   status,
   label,
   description,
+  isOpen,
+  reset,
 }: {
   children: ReactNode;
   status: Status;
   label?: string;
   description?: string;
+  isOpen: boolean;
+  reset?: () => void;
 }) {
   const iconClassNames = {
     pending: "bg-blue-100 text-blue-500 animate-spin",
@@ -29,7 +33,7 @@ export function Dialog({
     idle: "hidden",
   };
   return (
-    <DialogTrigger>
+    <DialogTrigger isOpen={isOpen}>
       {children}
 
       <ModalOverlay
@@ -77,7 +81,10 @@ export function Dialog({
 
                 <div className="flex justify-end">
                   <UIButton
-                    onPress={close}
+                    onPress={() => {
+                      close();
+                      reset?.();
+                    }}
                     className="text-black py-3 px-5 text-sm max-w-max"
                   >
                     Close

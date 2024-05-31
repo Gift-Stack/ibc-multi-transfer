@@ -5,8 +5,12 @@ import { Button } from "@milkyway-engine/ui/button";
 
 const SingleTransaction = () => {
   const { account, connect } = useConnect();
-  const { loading, transactionStatus, sendSingleTransaction } =
-    useTransactions();
+  const {
+    loading,
+    transactionStatus,
+    sendTransaction,
+    resetTransactionStatus,
+  } = useTransactions();
   const amountToSend = "0.0001";
 
   return (
@@ -28,12 +32,14 @@ const SingleTransaction = () => {
         </button>
       ) : (
         <Dialog
+          isOpen={transactionStatus.status !== "idle"}
+          reset={resetTransactionStatus}
           status={transactionStatus.status}
           label={transactionStatus.label}
           description={transactionStatus.description}
         >
           <Button
-            onPress={() => sendSingleTransaction(amountToSend)}
+            onPress={() => sendTransaction([account], [amountToSend])}
             isDisabled={loading}
           >
             {loading ? "Sending..." : "Send"}

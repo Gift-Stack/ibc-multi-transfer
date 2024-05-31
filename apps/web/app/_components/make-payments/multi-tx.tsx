@@ -1,11 +1,20 @@
 "use client";
 import { Button } from "@milkyway-engine/ui/button";
 import { Dialog } from "@milkyway-engine/ui/dialog";
+import { useTransactions } from "@milkyway-engine/wallet";
 import React, { useState } from "react";
 
 const MultiTransaction = () => {
   const [addresses, setAddresses] = useState<string[]>(["", ""]);
   const [inputs, setInputs] = useState(2);
+
+  const {
+    loading,
+    transactionStatus,
+    sendTransaction,
+    resetTransactionStatus,
+  } = useTransactions();
+  const amountToSend = "0.0001";
 
   const handleAddressChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -14,6 +23,10 @@ const MultiTransaction = () => {
     const newAddresses = [...addresses];
     newAddresses[index] = e.target.value;
     setAddresses(newAddresses);
+  };
+
+  const handleSendMultiTransaction = () => {
+    sendTransaction(addresses, Array(inputs).fill(amountToSend));
   };
 
   return (
@@ -55,11 +68,18 @@ const MultiTransaction = () => {
         </div>
 
         <Dialog
-          status="pending"
-          label="Initializing transaction"
-          description="Your transfer is currently being processed."
+          isOpen={transactionStatus.status !== "idle"}
+          reset={resetTransactionStatus}
+          status={transactionStatus.status}
+          label={transactionStatus.label}
+          description={transactionStatus.description}
         >
-          <Button>Send</Button>
+          <Button
+            onPress={handleSendMultiTransaction}
+            isDisabled={loading || !addresses[0] || !addresses[1]}
+          >
+            {loading ? "Sending..." : "Send"}
+          </Button>
         </Dialog>
       </div>
     </div>
