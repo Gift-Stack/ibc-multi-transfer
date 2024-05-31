@@ -10,7 +10,6 @@ import {
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { Buffer } from "buffer";
 import { fetchAccountInfo } from "./sendTx";
-import { api } from "./api";
 import { GasSimulateResponse } from "../types";
 import { OsmosisChainInfo } from "../constants";
 
@@ -65,7 +64,8 @@ export const simulateMsgs = async (
       signatures: [new Uint8Array(64)],
     }).finish();
 
-    const simulatedResult = await api<GasSimulateResponse>(
+    // Odd API: returns error but doesn't throw it. -- Would be checking if response satisfies an error.
+    const response = await fetch(
       `${OsmosisChainInfo.rest}/cosmos/tx/v1beta1/simulate`,
       {
         method: "POST",
@@ -78,10 +78,20 @@ export const simulateMsgs = async (
       }
     );
 
-    const gasUsed = parseInt(simulatedResult.gas_info.gas_used);
+    const simulatedResult = await response.json();
+
+    if (simulatedResult.code) {
+      throw new Error(simulatedResult.message, {
+        cause: "An error occurred while simulating transaction.",
+      });
+    }
+
+    const gasUsed = parseInt(
+      (simulatedResult satisfies GasSimulateResponse)?.gas_info?.gas_used
+    );
     if (Number.isNaN(gasUsed)) {
       throw new Error(
-        `Invalid integer gas: ${simulatedResult.gas_info.gas_used}`
+        `Invalid integer gas: ${simulatedResult?.gas_info?.gas_used}`
       );
     }
 
