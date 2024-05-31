@@ -24,12 +24,12 @@ const SingleTransaction = () => {
       </p>
 
       {!account ? (
-        <button
-          onClick={connect}
+        <Button
+          onPress={() => connect()}
           className="w-full p-3 rounded-lg border border-callout-border"
         >
           Connect wallet to send
-        </button>
+        </Button>
       ) : (
         <Dialog
           isOpen={transactionStatus.status !== "idle"}

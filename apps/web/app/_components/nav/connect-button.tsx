@@ -1,3 +1,4 @@
+import { Button } from "@milkyway-engine/ui/button";
 import { useBalance, useConnect } from "@milkyway-engine/wallet";
 import React from "react";
 
@@ -11,12 +12,12 @@ const ConnectButton = () => {
   if (account) return parsedBalance;
 
   return (
-    <button
-      onClick={connect}
+    <Button
+      onPress={() => connect()}
       className="hidden md:block bg-callout border border-callout-border rounded-xl px-4 py-3.5 text-sm text-white"
     >
       Connect Wallet
-    </button>
+    </Button>
   );
 };
 
