@@ -55,7 +55,7 @@ const SingleTransaction = () => {
               ibc
                 ? setIbcTransaction({
                     amount: amountToSend,
-                    recipient: accountToSendTo,
+                    recipient: cosmosAddressToSendTo,
                   })
                 : sendTransaction({
                     addresses: [accountToSendTo],
