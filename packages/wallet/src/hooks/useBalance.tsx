@@ -1,4 +1,4 @@
-import { getBalance } from "../keplr";
+import { getBalance } from "../utils/balance";
 import { useQuery } from "@tanstack/react-query";
 import { useConnect } from "./useConnect";
 

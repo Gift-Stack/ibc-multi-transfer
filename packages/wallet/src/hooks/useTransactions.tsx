@@ -1,4 +1,7 @@
-import { getTransactions, sendBalance } from "../keplr";
+import {
+  sendTransaction as sendTransactionPrimitive,
+  getTransactions,
+} from "../utils/transactions";
 import { useBalance } from "./useBalance";
 import { Dec } from "@keplr-wallet/unit";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -62,7 +65,7 @@ export const useTransactions = (
 
     setStatus(initialTransactionStatus);
 
-    await sendBalance(addresses, amounts, setStatus);
+    await sendTransactionPrimitive(addresses, amounts, setStatus);
   };
 
   const { data: transactions = [], isLoading: fetchingTransactions } = useQuery(

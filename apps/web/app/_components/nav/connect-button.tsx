@@ -3,7 +3,7 @@ import { useBalance, useConnect } from "@milkyway-engine/wallet";
 import React from "react";
 
 const ConnectButton = () => {
-  const { account, connect, disconnect } = useConnect();
+  const { account, connect } = useConnect();
   const { data: balance, fetchingBalance } = useBalance();
 
   const parsedBalance = `${balance?.value.toString(balance.decimals) ?? "0"} OSMO`;
@@ -13,9 +13,6 @@ const ConnectButton = () => {
     return (
       <div className="flex items-center gap-2">
         <p>{parsedBalance}</p>
-        <Button className="p-0 border-none w-max" onPress={() => disconnect()}>
-          <DisconnectSvg className="h-5 w-5" />
-        </Button>
       </div>
     );
 

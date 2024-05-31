@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { connectKeplr, disconnectKeplr } from "../keplr";
+import { connectKeplr } from "../utils/keplr";
 import { useQuery } from "@tanstack/react-query";
 
 export const useConnect = () => {
@@ -16,6 +16,7 @@ export const useConnect = () => {
   let milkywayConnectedAccounts = window.localStorage.getItem(
     "milkywayConnectedAccounts"
   );
+
   const {
     data: account,
     error,
@@ -29,26 +30,17 @@ export const useConnect = () => {
     refetchOnWindowFocus: false,
   });
 
-  const { data: disconnected, refetch: disconnectWallet } = useQuery({
-    queryKey: ["disconnect"],
-    queryFn: disconnectKeplr,
-    enabled: false,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-  });
-
   useEffect(() => {
-    window.addEventListener("keplr_keystorechange", (e) => {
+    window.addEventListener("keplr_keystorechange", () => {
       connectWallet();
     });
   }, []);
 
   return {
     connect: connectWallet,
-    disconnect: disconnectWallet,
-    isConnected: !!account && !disconnected,
-    account: disconnected ? undefined : account,
+    disconnect: () => {},
+    isConnected: !!account,
+    account: account,
     error: error?.message || "An error occurred, please refresh the page",
   };
 };
