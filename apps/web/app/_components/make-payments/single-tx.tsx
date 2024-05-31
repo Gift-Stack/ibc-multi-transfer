@@ -26,13 +26,12 @@ const SingleTransaction = () => {
         IBC Transfer
       </Toggle>
       <p className="italic text-sm text-center pb-5 font-medium">
-        Attention: You are about to send{" "}
-        {ibc ? cosmosAddressToSendTo : amountToSend} OSMO to this address{" "}
+        Attention: You are about to send {amountToSend} OSMO to this address{" "}
         <span>{ibc ? `(Osmosis <> Cosmos)` : ""}</span>
       </p>
 
       <p className="py-3 px-3 mb-5 rounded-xl bg-card w-full truncate">
-        {accountToSendTo}
+        {ibc ? cosmosAddressToSendTo : accountToSendTo}
       </p>
 
       {!account ? (
