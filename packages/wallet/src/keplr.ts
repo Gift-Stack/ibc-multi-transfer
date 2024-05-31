@@ -11,11 +11,6 @@ declare global {
   interface Window extends KeplrWindow {}
 }
 
-type KeplrConnectOption = {
-  setError: (error: string | null) => void;
-  setAccount: (account: string) => void;
-};
-
 export const getKeplrFromWindow: () => Promise<
   Keplr | undefined
 > = async () => {
@@ -46,25 +41,15 @@ export const getKeplrFromWindow: () => Promise<
   });
 };
 
-export const connectKeplr = async ({
-  setError,
-  setAccount,
-}: KeplrConnectOption) => {
+export const connectKeplr = async () => {
   const keplr = await getKeplrFromWindow();
 
-  if (keplr) {
-    try {
-      await keplr.experimentalSuggestChain(OsmosisChainInfo);
-      const key = await window.keplr?.getKey(OsmosisChainInfo.chainId);
-      if (key) {
-        setAccount(key.bech32Address);
-      }
-    } catch (e) {
-      if (e instanceof Error) {
-        console.log(e.message);
-        setError(e.message);
-      }
-    }
+  if (!keplr) return undefined;
+
+  await keplr.experimentalSuggestChain(OsmosisChainInfo);
+  const key = await window.keplr?.getKey(OsmosisChainInfo.chainId);
+  if (key) {
+    return key.bech32Address;
   }
 };
 
@@ -102,48 +87,48 @@ type TransactionDB = {
   transactions: Transaction[];
 };
 
-export const getTransactions = async (
-  walletAddress: string,
-  setter: (trx: Transaction[]) => void
-) => {
+export const getTransactions = async (walletAddress: string) => {
   if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB.");
   }
 
   const request = window.indexedDB.open("MilkyWayDB", 1);
 
-  request.onerror = function () {
-    console.log("error: ");
-  };
-
-  request.onupgradeneeded = function () {
-    const db = request.result;
-    if (!db.objectStoreNames.contains("transactions")) {
-      db.createObjectStore("transactions", {
-        keyPath: "id",
-      });
-    }
-  };
-
-  request.onsuccess = function () {
-    const db = request.result;
-    const txs = db.transaction("transactions", "readonly");
-    const store = txs.objectStore("transactions");
-    const range = IDBKeyRange.only(walletAddress);
-    const transactions = <IDBRequest<TransactionDB | undefined>>(
-      store.get(range)
-    );
-    transactions.onsuccess = function () {
-      const txs = transactions.result;
-
-      if (!txs) {
-        setter([]);
-        return;
-      }
-
-      setter(txs.transactions);
+  return new Promise<Transaction[]>((resolve, reject) => {
+    request.onerror = function () {
+      console.log("error: ");
+      reject(request.error);
     };
-  };
+
+    request.onupgradeneeded = function () {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("transactions")) {
+        db.createObjectStore("transactions", {
+          keyPath: "id",
+        });
+      }
+    };
+
+    request.onsuccess = function () {
+      const db = request.result;
+      const txs = db.transaction("transactions", "readonly");
+      const store = txs.objectStore("transactions");
+      const range = IDBKeyRange.only(walletAddress);
+      const transactions = <IDBRequest<TransactionDB | undefined>>(
+        store.get(range)
+      );
+      transactions.onsuccess = function () {
+        const txs = transactions.result;
+
+        if (!txs) {
+          resolve([]);
+          return;
+        }
+
+        resolve(txs.transactions);
+      };
+    };
+  });
 };
 
 type TransactionStatus = {
@@ -179,38 +164,26 @@ export const sendBalance = async (
     }).finish(),
   }));
 
-  try {
-    const gasUsed = await simulateMsgs(
-      OsmosisChainInfo,
-      key.bech32Address,
-      protoMsgs,
-      [{ denom: "uosmo", amount: "236" }]
-    );
+  const gasUsed = await simulateMsgs(
+    OsmosisChainInfo,
+    key.bech32Address,
+    protoMsgs,
+    [{ denom: "uosmo", amount: "236" }]
+  );
 
-    if (gasUsed) {
-      await sendTx({
-        keplr: window.keplr,
-        chainInfo: OsmosisChainInfo,
-        sender: key.bech32Address,
-        proto: protoMsgs,
-        fee: {
-          amount: [{ denom: "uosmo", amount: "236" }],
-          gas: Math.floor(gasUsed * 1.5).toString(),
-        },
-        decryptedAddresses: recipients,
-        decryptedAmounts: amounts,
-        setStatus,
-      });
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      setStatus({
-        description: e.message,
-        label: "An Error occured",
-        status: "error",
-      });
-    }
-
-    throw e;
+  if (gasUsed) {
+    await sendTx({
+      keplr: window.keplr,
+      chainInfo: OsmosisChainInfo,
+      sender: key.bech32Address,
+      proto: protoMsgs,
+      fee: {
+        amount: [{ denom: "uosmo", amount: "236" }],
+        gas: Math.floor(gasUsed * 1.5).toString(),
+      },
+      decryptedAddresses: recipients,
+      decryptedAmounts: amounts,
+      setStatus,
+    });
   }
 };

@@ -145,12 +145,9 @@ export const sendTx = async ({
 
     // -32603 is unsigned tx not found
     if (parsedData.error && parsedData.error.code !== -32603) {
-      setStatus({
-        label: parsedData.error.message || "Transaction failed",
-        description: parsedData.error.data,
-        status: "error",
+      throw new Error(parsedData.error.data, {
+        cause: parsedData.error.message || "Transaction failed",
       });
-      return;
     }
   });
 };

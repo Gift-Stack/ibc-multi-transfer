@@ -27,7 +27,7 @@ const MultiTransaction = () => {
   };
 
   const handleSendMultiTransaction = () => {
-    sendTransaction(addresses, Array(inputs).fill(amountToSend));
+    sendTransaction({ addresses, amounts: Array(inputs).fill(amountToSend) });
   };
 
   return (

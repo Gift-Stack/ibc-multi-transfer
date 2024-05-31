@@ -39,7 +39,9 @@ const SingleTransaction = () => {
           description={transactionStatus.description}
         >
           <Button
-            onPress={() => sendTransaction([account], [amountToSend])}
+            onPress={() =>
+              sendTransaction({ addresses: [account], amounts: [amountToSend] })
+            }
             isDisabled={loading}
           >
             {loading ? "Sending..." : "Send"}

@@ -5,7 +5,7 @@ import React from "react";
 
 const TransactionList = () => {
   const { account } = useConnect();
-  const { transactions } = useTransactions();
+  const { transactions } = useTransactions({ prefetch: true });
 
   return (
     <div>

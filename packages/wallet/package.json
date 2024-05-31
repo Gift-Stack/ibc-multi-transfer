@@ -4,7 +4,8 @@
   "private": true,
   "exports": {
     ".": "./src/hooks/index.ts",
-    "./utils": "./src/utils/index.ts"
+    "./utils": "./src/utils/index.ts",
+    "./provider": "./src/provider.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0"
@@ -13,6 +14,7 @@
     "@keplr-wallet/types": "^0.12.95",
     "@milkyway-engine/eslint-config": "*",
     "@milkyway-engine/typescript-config": "*",
+    "@tanstack/eslint-plugin-query": "^5.35.6",
     "@turbo/gen": "^1.12.4",
     "@types/eslint": "^8.56.5",
     "@types/node": "^20.11.24",
@@ -28,6 +30,6 @@
     "@keplr-wallet/cosmos": "^0.12.95",
     "@keplr-wallet/proto-types": "^0.12.95",
     "@keplr-wallet/unit": "^0.12.95",
-    "jotai": "^2.8.2"
+    "@tanstack/react-query": "^5.40.0"
   }
 }

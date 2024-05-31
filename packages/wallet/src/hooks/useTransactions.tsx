@@ -1,31 +1,52 @@
-import { useEffect } from "react";
 import { getTransactions, sendBalance } from "../keplr";
-import { useAtomValue, useSetAtom } from "jotai";
-import { storeAtom } from "../store";
 import { useBalance } from "./useBalance";
 import { Dec } from "@keplr-wallet/unit";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useConnect } from "./useConnect";
+import { useState } from "react";
 
-export const useTransactions = () => {
-  const { address, transactions, transactionInProgress, transactionStatus } =
-    useAtomValue(storeAtom);
-  const { fetchBalance, data: balance } = useBalance({ prefetch: false });
-  const setStore = useSetAtom(storeAtom);
+const initialTransactionStatus = {
+  status: "pending",
+  label: "Initializing transaction",
+  description: "Your transfer is currently being processed.",
+} as const;
 
-  useEffect(() => {
-    if (address) {
-      setStore((rest) => ({ ...rest, transactionInProgress: true }));
-      getTransactions(address, (trx) =>
-        setStore((rest) => ({ ...rest, transactions: trx }))
-      ).then(() => {
-        setStore((rest) => ({ ...rest, transactionInProgress: false }));
-      });
-    }
-  }, [address]);
+const idleTransactionStatu = {
+  status: "idle",
+  label: "",
+  description: "",
+} as const;
 
-  const sendTransaction = async (
-    addresses: string[],
-    amounts: `${number}`[]
-  ) => {
+type TransactionStatus = {
+  status: "pending" | "error" | "idle" | "success";
+  label: string;
+  description: string;
+};
+
+export const useTransactions = (
+  {
+    prefetch = false,
+  }: {
+    prefetch?: boolean;
+  } = { prefetch: false }
+) => {
+  const { account: address } = useConnect();
+  const [transactionStatus, setStatus] =
+    useState<TransactionStatus>(idleTransactionStatu);
+  const { fetchBalance, data: balance } = useBalance();
+
+  const fetchTransactions = async () => {
+    if (!address) return [];
+    const trx = await getTransactions(address);
+
+    return trx;
+  };
+
+  const sendTransactionFn = async (data: {
+    addresses: string[];
+    amounts: `${number}`[];
+  }) => {
+    const { addresses, amounts } = data;
     if (addresses.length !== amounts.length) {
       throw new Error("addresses and amounts must have the same length"); // Won't happen in the UI, but it's a good idea to check anyway
     }
@@ -39,52 +60,44 @@ export const useTransactions = () => {
       return;
     }
 
-    const initialTransactionStatus = {
-      status: "pending",
-      label: "Initializing transaction",
-      description: "Your transfer is currently being processed.",
-    } as const;
+    setStatus(initialTransactionStatus);
 
-    try {
-      const setStatus = (status: typeof transactionStatus) => {
-        setStore((rest) => ({
-          ...rest,
-          transactionStatus: status,
-        }));
-      };
-
-      setStore((rest) => ({
-        ...rest,
-        transactionStatus: initialTransactionStatus,
-        transactionInProgress: true,
-      }));
-      await sendBalance(addresses, amounts, setStatus);
-      await fetchBalance();
-      setStore((rest) => ({
-        ...rest,
-        transactionInProgress: false,
-      }));
-    } catch (error) {
-      setStore((rest) => ({
-        ...rest,
-        transactionInProgress: false,
-      }));
-    }
+    await sendBalance(addresses, amounts, setStatus);
   };
 
+  const { data: transactions = [], isLoading: fetchingTransactions } = useQuery(
+    {
+      queryKey: ["transactions", address],
+      queryFn: fetchTransactions,
+      enabled: !!address && prefetch,
+    }
+  );
+
+  const { mutate: sendTransaction, isPending: loading } = useMutation({
+    mutationFn: sendTransactionFn,
+    onSuccess: async () => {
+      await fetchBalance();
+    },
+    onError: (err) => {
+      setStatus({
+        description: err.message,
+        label: err.cause
+          ? typeof err.cause === "string"
+            ? err.cause
+            : (err.cause as any)?.message
+          : "An Error occured",
+        status: "error",
+      });
+    },
+  });
+
   const resetTransactionStatus = () => {
-    setStore((rest) => ({
-      ...rest,
-      transactionStatus: {
-        status: "idle",
-        label: "",
-        description: "",
-      },
-    }));
+    setStatus(idleTransactionStatu);
   };
 
   return {
-    loading: transactionInProgress,
+    loading,
+    fetchingTransactions,
     transactions,
     transactionStatus,
     sendTransaction,

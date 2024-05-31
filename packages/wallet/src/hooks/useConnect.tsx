@@ -1,32 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { connectKeplr } from "../keplr";
-import { storeAtom } from "../store";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useQuery } from "@tanstack/react-query";
 
 export const useConnect = () => {
-  const [error, setError] = useState<string | null>(null);
-
-  const { address: account } = useAtomValue(storeAtom);
-  const setStore = useSetAtom(storeAtom);
-  const setAccount = (address: string) =>
-    setStore((rest) => ({ ...rest, address }));
-
-  const connectWallet = () => {
-    connectKeplr({ setError, setAccount });
-  };
+  const {
+    data: account,
+    error,
+    refetch: connectWallet,
+  } = useQuery({
+    queryKey: ["account"],
+    queryFn: connectKeplr,
+  });
 
   useEffect(() => {
     window.addEventListener("keplr_keystorechange", () => {
       connectWallet();
     });
-
-    connectWallet();
   }, []);
 
   return {
     connect: connectWallet,
     isConnected: !!account,
     account: account,
-    error,
+    error: error?.message || "An error occurred, please refresh the page",
   };
 };
