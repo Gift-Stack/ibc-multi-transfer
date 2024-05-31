@@ -11,8 +11,21 @@ import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import Long from "long";
 import { Buffer } from "buffer";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import {
+  QueryClient,
+  SigningStargateClient,
+  IbcExtension,
+  setupIbcExtension,
+} from "@cosmjs/stargate";
+import { Coin } from "@cosmjs/proto-signing";
+import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
 import { Transaction } from "../types";
+import {
+  CometClient,
+  Tendermint34Client,
+  TendermintClient,
+} from "@cosmjs/tendermint-rpc";
+import { DenomTrace } from "cosmjs-types/ibc/applications/transfer/v1/transfer";
 
 type SendTxOption = {
   keplr: Keplr;
@@ -163,6 +176,8 @@ export const fetchAccountInfo = async (
       offlineSigner!
     );
 
+  // client.sendIbcTokens
+
   const account = await client.getAccount(address);
 
   if (!account) {
@@ -171,9 +186,57 @@ export const fetchAccountInfo = async (
 
   return {
     ...account,
+    client,
     account_number: account.accountNumber.toString(),
     sequence: account.sequence.toString(),
   };
+};
+
+export const ibcTransfer = async (
+  chainInfo: ChainInfo,
+  sender: string,
+  receiver: string,
+  coin: Coin,
+  fee: StdFee,
+  decryptedAddresses: string[],
+  decryptedAmounts: `${number}`[]
+) => {
+  const account = await fetchAccountInfo(chainInfo, sender);
+  if (!account) return;
+  const { client } = account;
+
+  const value = MsgTransfer.fromPartial({
+    sourcePort: "transfer",
+    sourceChannel: "channel-0",
+    token: coin,
+    sender: sender,
+    receiver: receiver,
+    timeoutHeight: {
+      revisionNumber: BigInt("27000000000000000"),
+      revisionHeight: BigInt(1),
+    },
+  });
+
+  const txResponse = await client.signAndBroadcast(
+    sender,
+    [
+      {
+        typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+        value,
+      },
+    ],
+    fee
+  );
+
+  saveToIndexedDB({
+    account: sender,
+    txHash: txResponse.transactionHash,
+    targetAddresses: decryptedAddresses,
+    amounts: decryptedAmounts,
+    timestamp: new Date().toISOString(),
+  });
+
+  // TODO: Add txTracer to the transaction
 };
 
 export const broadcastTxSync = async (
@@ -231,4 +294,20 @@ function saveToIndexedDB(data: Transaction) {
       }
     };
   };
+}
+
+export type QueryClientWithExtensions = QueryClient & IbcExtension;
+
+function createQueryClientWithExtensions(
+  tmClient: CometClient
+): QueryClientWithExtensions {
+  return QueryClient.withExtensions(tmClient, setupIbcExtension);
+}
+
+async function getDenomTrace(hash: string): Promise<DenomTrace | null> {
+  const endpoint = "";
+  const tmClient = await Tendermint34Client.connect(endpoint);
+  const queryClient = createQueryClientWithExtensions(tmClient);
+  const { denomTrace } = await queryClient.ibc.transfer.denomTrace(hash);
+  return denomTrace ?? null;
 }

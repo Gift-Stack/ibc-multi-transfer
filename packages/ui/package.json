@@ -8,7 +8,8 @@
     "./code": "./src/code.tsx",
     "./nav": "./src/nav.tsx",
     "./table": "./src/table.tsx",
-    "./dialog": "./src/dialog.tsx"
+    "./dialog": "./src/dialog.tsx",
+    "./toggle": "./src/toggle.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

@@ -3,7 +3,7 @@ import { Transaction } from "../types";
 import { OsmosisChainInfo } from "../constants";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { simulateMsgs } from "./simulateTx";
-import { sendTx } from "./sendTx";
+import { ibcTransfer, sendTx } from "./sendTx";
 
 type TransactionDB = {
   id: string;
@@ -109,4 +109,37 @@ export const sendTransaction = async (
       setStatus,
     });
   }
+};
+
+export const sendIBCTransferFromOsmosisToCosmos = async (data: {
+  recipient: string;
+  amount: `${number}`;
+  setStatus: (status: TransactionStatus) => void;
+}) => {
+  if (!window.keplr) return;
+  const { recipient, amount, setStatus } = data;
+  const key = await window.keplr.getKey(OsmosisChainInfo.chainId);
+
+  const osmosisCoin = { denom: "uosmo", amount: "236" };
+
+  const gasUsed = 120000;
+
+  await ibcTransfer(
+    OsmosisChainInfo,
+    key.bech32Address,
+    recipient,
+    osmosisCoin,
+    {
+      amount: [{ denom: "uosmo", amount: "236" }],
+      gas: Math.floor(gasUsed * 1.5).toString(),
+    },
+    [recipient],
+    [amount]
+  );
+
+  setStatus({
+    label: "IBC Transaction successful",
+    description: "Your cross-chain transaction is successful 🎉",
+    status: "success",
+  });
 };
