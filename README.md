@@ -1,82 +1,63 @@
-# Turborepo starter
+# Milkyway Turborepo
 
-This is an official starter Turborepo.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
+This is my implementation for the Milkyway [interview task](https://uncovered-sneeze-520.notion.site/Milkyway-Frontend-assignment-f9fac27d31c6432c947b1b3a8f39c73c#9f7a34aaca1c4671bad606e1376d8526).
 
 ## What's inside?
 
-This Turborepo includes the following packages/apps:
+This Turborepo includes the following packages/apps (some with their own READMEs):
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@milkyway-engine/ui`: a stub React component library shared by both `web` and `docs` applications
+- `web`: a [Next.js](https://nextjs.org/) where all the frontend code is located.
+- `@milkyway-engine/ui`: a stub React component library shared by both `web` and `docs` applications. [Read docs](packages/ui/README.md)
+- `@milkyway-engine/wallet`: a stub React hooks library utilized in `web` for blockchain interactivities. [Read docs](packages/wallet/README.md)
 - `@milkyway-engine/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `@milkyway-engine/tailwind-config`: `tailwindcss` configurations used throughout the apps and ui package (includes `tailwindcss`, `postcss` and `autoprefixer`)
 - `@milkyway-engine/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
-### Utilities
+### Why use this pattern?
 
-This Turborepo has some additional tools already setup for you:
+- Save time and effort on repetitive tasks
+- Segregating ui package from web package allows for easier maintenance and scalability
+- Enables a consistent coding style
+- Provides a centralized location for configuration files
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Getting Started
+
+First, run the development server:
+
+```bash
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) (or whatever port you specified) with your browser to see the result.
 
 ### Build
 
-To build all apps and packages, run the following command:
+To build the web app, run the following command:
 
 ```
-cd my-turborepo
-pnpm build
+yarn build:web
+```
+
+To build all apps and packages in parallel, run the following command:
+
+```
+yarn build
 ```
 
 ### Develop
 
-To develop all apps and packages, run the following command:
+To run the web app, run the following command:
 
 ```
-cd my-turborepo
-pnpm dev
+yarn dev:web
 ```
 
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+To develop all apps and packages in parallel, run the following command:
 
 ```
-cd my-turborepo
-npx turbo login
+yarn dev
 ```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
