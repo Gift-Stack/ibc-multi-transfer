@@ -1,6 +1,6 @@
 # Milkyway Turborepo
 
-This is my implementation for the Milkyway [interview task](https://uncovered-sneeze-520.notion.site/Milkyway-Frontend-assignment-f9fac27d31c6432c947b1b3a8f39c73c#9f7a34aaca1c4671bad606e1376d8526).
+This is the implementation for my Cosmos [PoC](https://iamgifted.notion.site/Cosmos-TRX-PoC-9cec7aa066bc4428a7b58b2412d61858).
 
 ## What's inside?
 
