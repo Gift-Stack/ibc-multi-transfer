@@ -1,4 +1,4 @@
-# Milkyway Turborepo
+# Cosmos Asset Transfer (+IBC) Turborepo
 
 This is the implementation for my Cosmos [PoC](https://iamgifted.notion.site/Cosmos-TRX-PoC-9cec7aa066bc4428a7b58b2412d61858).
 
